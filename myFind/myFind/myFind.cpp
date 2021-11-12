@@ -1,20 +1,38 @@
-// myFind.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <dirent.h>
+#include <string>
+#include <vector>
+#include <string.h>
 
-int main()
-{
-    std::cout << "Hey World!\n";
+int main(){
+
+    DIR *dir; 
+    struct dirent *diread;
+    std::vector<char *> files;
+    char real_path[256];
+    std::string path =  "/home/dario/Documents/TestFolder";
+    std::string filename = "pyp.py";
+
+    strcpy(real_path, path.c_str());
+
+    if ((dir = opendir(real_path)) != nullptr) {
+        while ((diread = readdir(dir)) != nullptr) {
+            files.push_back(diread->d_name);
+        }
+        closedir (dir);
+    } else {
+        perror ("opendir");
+        return EXIT_FAILURE;
+    }
+
+    //for (auto file : files) std::cout << file << "| ";
+    //    std::cout << std::endl;
+    for(auto file: files){
+        if(file == filename){
+            std::cout << "File found" << std::endl;
+        }
+    }
+
+
+    return EXIT_SUCCESS;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
