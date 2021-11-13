@@ -2,19 +2,34 @@
 //
 
 #include <iostream>
-
-int main()
-{
-    std::cout << "Hey World!\n";
+#include <unistd.h>
+/* Hilfsfunktion */
+void print_usage( char *programm_name ) {
+    printf("Usage: %s [-R] [-i] searchpath filename1 [filename2] ... [filenameN]\n\n",programm_name);
+    return;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+int main(int argc, char*argv[] )
+{
+    int c;
+    char *programm_name;
+    programm_name = argv[0];
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+    while ((c = getopt(argc, argv, "Ri:")) != EOF){
+        switch (c)
+        {
+        case '?':
+            print_usage(programm_name);
+            exit(1);
+            break;
+        case 'R':
+            /* code */
+            break;
+        case 'i':
+            break;
+        default:
+            break;
+        }
+    }
+    std::cout << "Hey World!\n";
+}
