@@ -1,8 +1,8 @@
 #Makefile fuer mycommand
 all: myFind
 
-mycommand: myFind.cpp
-	gcc -g -Wall -o myFind myFind.cpp
+myFind: myFind.cpp
+	g++ -g -fPIC -Wall -o myFind myFind.cpp
 
 clean:
 	rm -f myFind
