@@ -1,42 +1,11 @@
 #include <iostream>
 #include <dirent.h>
 #include <string>
+#include <algorithm>
 #include <vector>
 #include <string.h>
-
-int main(){
-
-    DIR *dir; 
-    struct dirent *diread;
-    std::vector<char *> files;
-    char real_path[256];
-    std::string path =  "/home/dario/Documents/TestFolder";
-    std::string filename = "pyp.py";
-
-    strcpy(real_path, path.c_str());
-
-    if ((dir = opendir(real_path)) != nullptr) {
-        while ((diread = readdir(dir)) != nullptr) {
-            files.push_back(diread->d_name);
-        }
-        closedir (dir);
-    } else {
-        perror ("opendir");
-        return EXIT_FAILURE;
-    }
-
-    //for (auto file : files) std::cout << file << "| ";
-    //    std::cout << std::endl;
-    for(auto file: files){
-        if(file == filename){
-            std::cout << "File found" << std::endl;
-        }
-    }
-
-
-    return EXIT_SUCCESS;
 #include <unistd.h>
-#include <string>
+
 
 /* Hilfsfunktion */
 void print_usage( char *programm_name ) {
@@ -46,10 +15,73 @@ void print_usage( char *programm_name ) {
 
 void child(int argc, char **argv, int index, std::string path, bool rec, bool insensitive)
 {
-    pid_t pid;
-    // Suchlogik einbauen
-    printf("%s\n",argv[index]);
+    pid_t pid = 1;
+
+    DIR *dir; 
+    struct dirent *diread;
+    std::vector<char *> files;
+    char real_path[256];
+    strcpy(real_path, path.c_str());
+    int counter = 0;
+    std::string filename = "";
+    
+    if(rec){
+
+    }else{
+        if ((dir = opendir(real_path)) != nullptr) {
+            while ((diread = readdir(dir)) != nullptr) {
+                files.push_back(diread->d_name);
+            }
+            closedir (dir);
+        } else {
+            perror ("opendir");
+        }
+
+
+        for(auto file: files){
+            filename = file; 
+            if(insensitive){
+                std::for_each(filename.begin(),filename.end(), [](char &c){
+                    c = ::tolower(c);
+                });
+                std::string insenFile = argv[index];
+                std::for_each(insenFile.begin(), insenFile.end(), [](char &c){
+                    c = ::tolower(c);
+                });
+                if(filename == insenFile){
+                    counter++;
+                    strcpy(argv[index], filename.c_str());
+                }
+
+            }else{
+                
+                if(filename == argv[index]){
+                    counter++;
+                }   
+            }
+            
+        }
+
+        if(counter > 0){
+            std::cout << pid << " : " << argv[index] << " : " << path << "/" << argv[index] << std::endl;
+        }else{
+            std::cout << "File(s) not found" << std::endl;
+        }
+    }
+   
+    //Suchlogik einbauen
+    // printf("%s\n",argv[index]);
 }
+
+void test(){
+
+    std::string path =  "/home/dario/Documents/TestFolder";
+    std::string filename = "pyp.py";
+
+    
+}
+
+
 
 int main(int argc, char*argv[] )
 {
@@ -88,22 +120,22 @@ int main(int argc, char*argv[] )
     /* Geht die angegebenen Files durch und forkt für jedes File */
     if(param_count < argc){
         for(int i = param_count; i < argc; i++){
-        pid = fork();
-        switch (pid)
-	    {
-            case -1:
-                printf("Child konnte nicht gestartet werden.");
-                exit(EXIT_FAILURE);
-                break;
-            case 0:
-                printf("child\n");
-                child(argc, argv, i, argv[param_count-1], rec, insensitive);
-                exit(EXIT_SUCCESS);
-                break;
-            default:
-                break;
-	    }
-    }
+            pid = fork();
+            switch (pid)
+	        {
+                case -1:
+                    printf("Child konnte nicht gestartet werden.");
+                    exit(EXIT_FAILURE);
+                    break;
+                case 0:
+                    printf("child\n");
+                    child(argc, argv, i, argv[param_count-1], rec, insensitive);
+                    exit(EXIT_SUCCESS);
+                    break;
+                default:
+                    break;
+	        }
+        }
     }else{
         print_usage(programm_name);
     }
