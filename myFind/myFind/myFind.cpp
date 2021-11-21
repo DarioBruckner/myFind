@@ -15,22 +15,23 @@ void print_usage(char *programm_name)
     return;
 }
 
+/* searchLogic of the filesearch, addes all results into a vector and returns them to child */
 std::vector<std::string> searchLogic(std::vector<std::string> message, char **argv, int index, std::string path, bool rec, bool insensitive, pid_t pid)
 {
 
-    DIR *dir;
-    struct dirent *diread;
-    std::vector<char *> files;
-    char real_path[256];
+    DIR *dir; //the directory
+    struct dirent *diread; //struct of the data of the file 
+    std::vector<char *> files; //vector of the name of all files in a directory
+    char real_path[256]; //the path to the file
     strcpy(real_path, path.c_str());
     int counter = 0;
     std::string filename = "";
-
+    /* opens directory */
     if ((dir = opendir(real_path)) != nullptr)
     {
         while ((diread = readdir(dir)) != nullptr)
         {
-
+            /* checks if element is a directory and if recursive search is true looks into the directory */
             std::string name = diread->d_name;
             if (rec && (diread->d_type == DT_DIR) && name != "." && name != "..")
             {
@@ -47,6 +48,7 @@ std::vector<std::string> searchLogic(std::vector<std::string> message, char **ar
         perror("opendir");
     }
 
+    /* iterates through the list of elements in filelist and checks if a name matches the input of user */
     for (auto file : files)
     {
         filename = file;
@@ -72,7 +74,7 @@ std::vector<std::string> searchLogic(std::vector<std::string> message, char **ar
             }
         }
     }
-
+    /* if a file was found add the message to the list and return it to the child */
     if (counter > 0)
     {
 
