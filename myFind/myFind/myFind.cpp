@@ -86,6 +86,7 @@ std::vector<std::string> searchLogic(std::vector<std::string> message, char **ar
     return message;
 }
 
+/* searches for a file in a given path */
 void child(int argc, char **argv, int index, std::string path, bool rec, bool insensitive)
 {
     pid_t pid = getpid(); // get process id of child
