@@ -25,52 +25,54 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
     int counter = 0;
     std::string filename = "";
     
-    if(rec){
-
-    }else{
-        if ((dir = opendir(real_path)) != nullptr) {
-            while ((diread = readdir(dir)) != nullptr) {
-                files.push_back(diread->d_name);
-            }
-            closedir (dir);
-        } else {
-            perror ("opendir");
-        }
-
-
-        for(auto file: files){
-            filename = file; 
-            if(insensitive){
-                std::for_each(filename.begin(),filename.end(), [](char &c){
-                    c = ::tolower(c);
-                });
-                std::string insenFile = argv[index];
-                std::for_each(insenFile.begin(), insenFile.end(), [](char &c){
-                    c = ::tolower(c);
-                });
-                if(filename == insenFile){
-                    counter++;
-                    strcpy(argv[index], filename.c_str());
-                }
-
-            }else{
-                
-                if(filename == argv[index]){
-                    counter++;
-                }   
+    
+    if ((dir = opendir(real_path)) != nullptr) {
+        while ((diread = readdir(dir)) != nullptr) {
+            
+            std::string name = diread->d_name;
+            if(rec && (diread->d_type == DT_DIR) && name != "." && name != ".."){
+                path += "/" + name;
+                child(argc, argv, index, path, rec, insensitive);
             }
             
+            files.push_back(diread->d_name);
         }
-
-        if(counter > 0){
-            std::cout << pid << " : " << argv[index] << " : " << path << "/" << argv[index] << std::endl;
-        }else{
-            std::cout << "File(s) not found" << std::endl;
-        }
+        closedir (dir);
+    } else {
+        perror ("opendir");
     }
-   
-    //Suchlogik einbauen
-    // printf("%s\n",argv[index]);
+
+
+    for(auto file: files){
+        filename = file; 
+        if(insensitive){
+            std::for_each(filename.begin(),filename.end(), [](char &c){
+                c = ::tolower(c);
+            });
+            std::string insenFile = argv[index];
+            std::for_each(insenFile.begin(), insenFile.end(), [](char &c){
+                c = ::tolower(c);
+            });
+            if(filename == insenFile){
+                counter++;
+                strcpy(argv[index], filename.c_str());
+            }
+
+        }else{
+                
+            if(filename == argv[index]){
+                counter++;
+            }   
+        }
+            
+    }
+    
+    if(counter > 0){
+        std::cout << std::endl << pid << " : " << argv[index] << " : " << path << "/" << argv[index] << std::endl;
+    }else{
+        std::cout << std::endl << "File(s) not found" << std::endl;
+    }
+    
 }
 
 void test(){
@@ -102,13 +104,13 @@ int main(int argc, char*argv[] )
             break;
         case 'R':
             rec = true;
-            printf("R\n");
+            
             param_count++;
             /* code */
             break;
         case 'i':
             insensitive = true;
-            printf("i\n");
+            
             param_count++;
             break;
         default:
@@ -128,7 +130,6 @@ int main(int argc, char*argv[] )
                     exit(EXIT_FAILURE);
                     break;
                 case 0:
-                    printf("child\n");
                     child(argc, argv, i, argv[param_count-1], rec, insensitive);
                     exit(EXIT_SUCCESS);
                     break;
