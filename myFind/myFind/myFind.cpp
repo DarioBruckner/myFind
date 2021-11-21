@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "myqueue.h"
+#include <sys/wait.h>
 
 /* Hilfsfunktion */
 void print_usage(char *programm_name)
@@ -87,12 +88,12 @@ std::vector<std::string> searchLogic(std::vector<std::string> message, char **ar
 
 void child(int argc, char **argv, int index, std::string path, bool rec, bool insensitive)
 {
-    pid_t pid = getpid();
-    message_t msg; /* Buffer fuer Message */
-    msg.mType = 1;
-    int msgid = -1; /* Message Queue ID */
+    pid_t pid = getpid(); // get process id of child
+    message_t msg;        // Buffer for message
+    msg.mType = 1;        // Set message type
+    int msgid = -1;       // Message Queue ID
 
-    /* Message Queue oeffnen */
+    /* Open message queue */
     if ((msgid = msgget(KEY, PERM)) == -1)
     {
         /* error handling */
@@ -100,7 +101,7 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
     }
 
     std::vector<std::string> messages;
-    messages = searchLogic(messages, argv, index, path, rec, insensitive, pid);
+    messages = searchLogic(messages, argv, index, path, rec, insensitive, pid); // call searchlogic
 
     if (messages.size() > 0)
     {
@@ -108,7 +109,7 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
         {
             char mess[265];
             strcpy(mess, mes.c_str());
-            /* Nachricht verschicken */
+            /* send message */
             strncpy(msg.mText, mess, MAX_DATA);
             if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
             {
@@ -141,14 +142,16 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
 int main(int argc, char *argv[])
 {
     int c;
-    message_t msg;  /* Buffer fuer Message */
-    int msgid = -1; /* Message Queue ID */
-    int param_count = 2;
-    char *programm_name;
     pid_t pid;
-    bool rec = false;
-    bool insensitive = false;
+    message_t msg;       // Buffer for the message
+    int msgid = -1;      // Message queue id
+    int param_count = 2; // Parameter counter for calculating file number
+    char *programm_name;
     programm_name = argv[0];
+    bool rec = false;         // To check if recursive search is toggled
+    bool insensitive = false; // To check if case insensitive search is toggled
+
+    /* checks the command for flags */
     while ((c = getopt(argc, argv, "Ri")) != EOF)
     {
         switch (c)
@@ -159,13 +162,10 @@ int main(int argc, char *argv[])
             break;
         case 'R':
             rec = true;
-
             param_count++;
-            /* code */
             break;
         case 'i':
             insensitive = true;
-
             param_count++;
             break;
         default:
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    /* Message Queue neu anlegen */
+    /* create new message queue */
     if ((msgid = msgget(KEY, PERM | IPC_CREAT | IPC_EXCL)) == -1)
     {
         /* error handling */
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    /* Geht die angegebenen Files durch und forkt für jedes File */
+    /* checks the parameters, for each listed file a child will be forked */
     if (param_count < argc)
     {
         for (int i = param_count; i < argc; i++)
@@ -194,8 +194,8 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
                 break;
             case 0:
-                child(argc, argv, i, argv[param_count - 1], rec, insensitive);
-                exit(EXIT_SUCCESS);
+                child(argc, argv, i, argv[param_count - 1], rec, insensitive); // call child method to search for file
+                exit(EXIT_SUCCESS); 
                 break;
             default:
                 break;
@@ -204,12 +204,14 @@ int main(int argc, char *argv[])
     }
     else
     {
+        /* print usage if no files are listed in the command */
         print_usage(programm_name);
     }
 
-    int countWhile = 1;
+    /* wait for childs to be closed */
+    wait(NULL);
 
-    while (countWhile <= 2)
+    do
     {
         if (msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, 0) == -1)
         {
@@ -218,10 +220,9 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         printf("Message received: %s\n", msg.mText);
-        printf("%d", countWhile);
-        countWhile++;
-    }
+    } while (msg.mText != NULL);
+
+    /* close the message queue */
     msgctl(msgid, IPC_RMID, NULL);
     exit(EXIT_SUCCESS);
-
 }
