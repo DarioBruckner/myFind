@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 
     int countWhile = 1;
 
-    while (countWhile < 1000)
+    while (countWhile <= 2)
     {
         if (msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, 0) == -1)
         {
@@ -222,6 +222,6 @@ int main(int argc, char *argv[])
         countWhile++;
     }
     msgctl(msgid, IPC_RMID, NULL);
-    
+    exit(EXIT_SUCCESS);
 
 }
