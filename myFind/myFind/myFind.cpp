@@ -13,9 +13,11 @@ void print_usage( char *programm_name ) {
     return;
 }
 
-void child(int argc, char **argv, int index, std::string path, bool rec, bool insensitive)
-{
-    pid_t pid = 1;
+
+
+
+
+std::vector<std::string> searchLogic(std::vector<std::string> message, char **argv, int index, std::string path, bool rec, bool insensitive, pid_t pid){
 
     DIR *dir; 
     struct dirent *diread;
@@ -31,8 +33,8 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
             
             std::string name = diread->d_name;
             if(rec && (diread->d_type == DT_DIR) && name != "." && name != ".."){
-                path += "/" + name;
-                child(argc, argv, index, path, rec, insensitive);
+                std::string newpath = path + "/" + name;
+                message = searchLogic(message, argv, index, newpath, rec, insensitive, pid);
             }
             
             files.push_back(diread->d_name);
@@ -66,14 +68,41 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
         }
             
     }
-    
+
     if(counter > 0){
-        std::cout << std::endl << pid << " : " << argv[index] << " : " << path << "/" << argv[index] << std::endl;
+
+        std::string temp = argv[index];
+
+        //printf("%d \n", pid);
+        std::string filefound = std::to_string(pid) + " : " + temp + " : " + path + "/" + argv[index];
+        message.push_back(filefound);
+    }
+
+
+
+    return message;
+}
+
+void child(int argc, char **argv, int index, std::string path, bool rec, bool insensitive)
+{
+    pid_t pid = getpid();
+
+    std::vector<std::string> messages;
+    messages = searchLogic(messages, argv, index, path, rec, insensitive, pid);
+
+    if(messages.size() > 0){
+        for(std::string mes : messages){
+            std::cout << std::endl;
+            std::cout << mes << std::endl;
+            std::cout << std::endl;
+        }
     }else{
-        std::cout << std::endl << "File(s) not found" << std::endl;
+        std::cout << std::endl << std::to_string(pid) << " : File(s) not found" << std::endl << std::endl;
     }
     
 }
+
+
 
 void test(){
 
