@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "myqueue.h"
+#include <sys/wait.h>
 
 /* Hilfsfunktion */
 void print_usage(char *programm_name)
@@ -209,7 +210,9 @@ int main(int argc, char *argv[])
 
     int countWhile = 1;
 
-    while (countWhile <= 2)
+    wait(NULL);
+
+    do
     {
         if (msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, 0) == -1)
         {
@@ -218,10 +221,8 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         printf("Message received: %s\n", msg.mText);
-        printf("%d", countWhile);
-        countWhile++;
-    }
+    } while (msg.mText != NULL);
+
     msgctl(msgid, IPC_RMID, NULL);
     exit(EXIT_SUCCESS);
-
 }
