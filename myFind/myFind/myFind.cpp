@@ -117,10 +117,6 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
                 /* error handling */
                 fprintf(stderr, "%s: Can't send message\n", argv[0]);
             }
-
-            std::cout << std::endl;
-            std::cout << mes << std::endl;
-            std::cout << std::endl;
         }
     }
     else
@@ -134,9 +130,6 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
             /* error handling */
             fprintf(stderr, "%s: Can't send message\n", argv[0]);
         }
-        std::cout << std::endl
-                  << std::to_string(pid) << " : File(s) not found" << std::endl
-                  << std::endl;
     }
 }
 
@@ -196,7 +189,7 @@ int main(int argc, char *argv[])
                 break;
             case 0:
                 child(argc, argv, i, argv[param_count - 1], rec, insensitive); // call child method to search for file
-                exit(EXIT_SUCCESS); 
+                exit(EXIT_SUCCESS);
                 break;
             default:
                 break;
@@ -211,17 +204,15 @@ int main(int argc, char *argv[])
 
     /* wait for childs to be closed */
     wait(NULL);
-
+    int msg_status;
     do
     {
-        if (msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, 0) == -1)
+        msg_status = msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, IPC_NOWAIT);
+        if (msg_status >= 0)
         {
-            /* error handling */
-            fprintf(stderr, "%s: Can't receive from message queue\n", argv[0]);
-            return EXIT_FAILURE;
+            printf("%s\n", msg.mText);
         }
-        printf("Message received: %s\n", msg.mText);
-    } while (msg.mText != NULL);
+    } while (msg_status >= 0);
 
     /* close the message queue */
     msgctl(msgid, IPC_RMID, NULL);
