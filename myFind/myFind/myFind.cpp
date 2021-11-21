@@ -121,7 +121,7 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
     }
     else
     {
-        std::string nothing = std::to_string(pid) + " : File(s) not found";
+        std::string nothing = std::to_string(pid) + " : "+ argv[index] + " : File(s) not found";
         char mess[255];
         strcpy(mess, nothing.c_str());
         strncpy(msg.mText, mess, MAX_DATA);
