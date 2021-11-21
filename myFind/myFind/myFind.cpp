@@ -103,17 +103,6 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
 }
 
 
-
-void test(){
-
-    std::string path =  "/home/dario/Documents/TestFolder";
-    std::string filename = "pyp.py";
-
-    
-}
-
-
-
 int main(int argc, char*argv[] )
 {
     int c;
