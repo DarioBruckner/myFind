@@ -173,7 +173,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-
     /* Message Queue neu anlegen */
     if ((msgid = msgget(KEY, PERM | IPC_CREAT | IPC_EXCL)) == -1)
     {
@@ -208,7 +207,9 @@ int main(int argc, char *argv[])
         print_usage(programm_name);
     }
 
-    while (1)
+    int countWhile = 1;
+
+    while (countWhile < 1000)
     {
         if (msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, 0) == -1)
         {
@@ -217,5 +218,10 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
         }
         printf("Message received: %s\n", msg.mText);
+        printf("%d", countWhile);
+        countWhile++;
     }
+    msgctl(msgid, IPC_RMID, NULL);
+    
+
 }
