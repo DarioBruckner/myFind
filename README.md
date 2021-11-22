@@ -26,9 +26,9 @@ Linus Dehner & Dario Bruckner
 <pid>: <filename>: <complete-path-to-found-file>
 ```
 
-- <pid>
+- `<pid>`
   - the process id of the searching child
-- <filename> 
+- `<filename>` 
   - the filename of the searched file
-- <complete-path-to-found-file> 
+- `<complete-path-to-found-file>` 
   - the path tho the desired file 
