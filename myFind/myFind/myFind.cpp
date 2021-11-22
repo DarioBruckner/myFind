@@ -79,10 +79,13 @@ std::vector<std::string> searchLogic(std::vector<std::string> message, char **ar
     {
 
         std::string temp = argv[index];
-
-        //printf("%d \n", pid);
-        std::string filefound = std::to_string(pid) + " : " + temp + " : " + path + "/" + argv[index];
-        message.push_back(filefound);
+		if(path == "/"){
+			std::string filefound = std::to_string(pid) + " : " + temp + " : " + path + argv[index];
+			message.push_back(filefound);
+		}else{
+			std::string filefound = std::to_string(pid) + " : " + temp + " : " + path + "/" + argv[index];
+			message.push_back(filefound);
+		}
     }
 
     return message;
