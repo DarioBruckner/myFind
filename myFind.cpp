@@ -8,7 +8,7 @@
 #include "myqueue.h"
 #include <sys/wait.h>
 
-/* Hilfsfunktion */
+/* helper function */
 void print_usage(char *programm_name)
 {
     printf("Usage: %s [-R] [-i] searchpath filename1 [filename2] ... [filenameN]\n\n", programm_name);
@@ -111,12 +111,14 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
 
     if (messages.size() > 0)
     {
+        /* iterate over the list of messages to send each one */
         for (std::string mes : messages)
         {
             char mess[265];
+            /* copy message into sendable char */
             strcpy(mess, mes.c_str());
-            /* send message */
             strncpy(msg.mText, mess, MAX_DATA);
+            /* send message */
             if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
             {
                 /* error handling */
@@ -126,10 +128,13 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
     }
     else
     {
+        /* create File not found message */
         std::string nothing = std::to_string(pid) + " : "+ argv[index] + " : File(s) not found";
         char mess[255];
+        /* copy message into sendable char */
         strcpy(mess, nothing.c_str());
         strncpy(msg.mText, mess, MAX_DATA);
+        /* send message */
         if (msgsnd(msgid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
         {
             /* error handling */
@@ -138,6 +143,7 @@ void child(int argc, char **argv, int index, std::string path, bool rec, bool in
     }
 }
 
+/* reads the command, creates childs and prints the recived messages */
 int main(int argc, char *argv[])
 {
     int c;
@@ -210,6 +216,7 @@ int main(int argc, char *argv[])
     /* wait for childs to be closed */
     wait(NULL);
     int msg_status;
+    /* prints all recieved messages */
     do
     {
         msg_status = msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 0, IPC_NOWAIT);
