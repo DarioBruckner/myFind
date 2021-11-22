@@ -8,15 +8,15 @@ Linus Dehner & Dario Bruckner
 ./myfind [-R] [-i] searchpath filename1 [filename2] ...[filenameN]
 ```
 
-- -R:
+- `-R`
   -  should switch myfind in recursive mode (else the files should only be search in the defined folder) 
 
-- -i
+- `-i`
   - case in-sensitive search
 
-- searchpath 
+- `searchpath` 
   - can be an absolute or a relative path
-- filename 
+- `filename` 
   - only filenames as plain string 
   - no support for paths, subpaths, wildcards required.
 
